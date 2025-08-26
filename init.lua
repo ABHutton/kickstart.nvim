@@ -87,7 +87,7 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 vim.keymap.set('n', '<leader>ot', ':split term://zsh<CR>', { desc = 'Open terminal in new split' })
 -- Comment/uncomment a visual selection
 vim.keymap.set('x', '<leader>c', ':normal! I# \r', { desc = 'Comment out selection' })
-vim.keymap.set('x', '<leader>cu', ':normal! ^x\r', { desc = 'Uncomment selection' })
+vim.keymap.set('x', '<leader>u', ':normal! ^x\r', { desc = 'Uncomment selection' })
 -- Current filepath
 vim.keymap.set('n', '<leader>fp', function()
   vim.fn.setreg('+', vim.fn.expand '%')
@@ -589,7 +589,59 @@ require('lazy').setup({
       signature = { enabled = true },
     },
   },
-
+  {
+    'nvimdev/dashboard-nvim',
+    event = 'VimEnter',
+    config = function()
+      require('dashboard').setup {
+        theme = 'hyper',
+        shortcut_type = 'number',
+        config = {
+          week_header = {
+            enable = true,
+          },
+          shortcut = {
+            { desc = '󰊳 Update', group = '@property', action = 'Lazy update', key = 'u' },
+            {
+              icon = ' ',
+              icon_hl = '@variable',
+              desc = 'Files',
+              group = 'Label',
+              action = 'Telescope find_files',
+              key = 'f',
+            },
+            {
+              desc = ' KeyMaps',
+              group = 'DiagnosticHint',
+              action = 'Telescope keymaps',
+              key = 'k',
+            },
+            {
+              desc = ' Grep Search',
+              group = 'Number',
+              action = 'Telescope live_grep',
+              key = 'g',
+            },
+          },
+          disable_move = true,
+        },
+      }
+    end,
+    dependencies = { { 'nvim-tree/nvim-web-devicons' } },
+  },
+  -- Startup.nvim plugin here
+  --[[
+  {
+    'max397574/startup.nvim',
+    lazy = false,
+    dependencies = {
+      'nvim-telescope/telescope.nvim',
+      'nvim-lua/plenary.nvim',
+    },
+    config = function()
+      require('startup').setup { theme = 'alex_startup' }
+    end,
+  }, ]]
   { -- You can easily change to a different colorscheme.
     --
     'folke/tokyonight.nvim',
