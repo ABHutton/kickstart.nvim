@@ -85,6 +85,9 @@ vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower win
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 -- Open a terminal in a new split
 vim.keymap.set('n', '<leader>ot', ':split term://zsh<CR>', { desc = 'Open terminal in new split' })
+-- Comment/uncomment a visual selection
+vim.keymap.set('x', '<leader>c', ':normal! I# \r', { desc = 'Comment out selection' })
+vim.keymap.set('x', '<leader>cu', ':normal! ^x\r', { desc = 'Uncomment selection' })
 -- Current filepath
 vim.keymap.set('n', '<leader>fp', function()
   vim.fn.setreg('+', vim.fn.expand '%')
