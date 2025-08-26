@@ -83,6 +83,13 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+-- Open a terminal in a new split
+vim.keymap.set('n', '<leader>ot', ':split term://zsh<CR>', { desc = 'Open terminal in new split' })
+-- Current filepath
+vim.keymap.set('n', '<leader>fp', function()
+  vim.fn.setreg('+', vim.fn.expand '%')
+  vim.notify('Copied relative path to clipboard', vim.log.levels.INFO)
+end, { desc = 'Copy relative file path' })
 -- Highlight when yanking (copying) text
 vim.api.nvim_create_autocmd('TextYankPost', {
   desc = 'Highlight when yanking (copying) text',
@@ -651,6 +658,12 @@ require('lazy').setup({
     --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
     --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+  },
+  {
+    'm4xshen/hardtime.nvim',
+    lazy = false,
+    dependencies = { 'MunifTanjim/nui.nvim' },
+    opts = {},
   },
 
   --  require 'kickstart.plugins.debug',
