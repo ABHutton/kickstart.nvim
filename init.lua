@@ -208,14 +208,13 @@ require('lazy').setup({
     config = function()
       -- [[ Configure Telescope ]]
       require('telescope').setup {
-        -- You can put your default mappings / updates / etc. in here
-        --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
-        -- pickers = {}
+        defaults = {},
+        pickers = {
+          find_files = {
+            hidden = true,
+            no_ignore = true,
+          },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
@@ -698,12 +697,12 @@ require('lazy').setup({
     --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
   },
-  {
-    'm4xshen/hardtime.nvim',
-    lazy = false,
-    dependencies = { 'MunifTanjim/nui.nvim' },
-    opts = {},
-  },
+  -- {
+  --   'm4xshen/hardtime.nvim',
+  --   lazy = false,
+  --   dependencies = { 'MunifTanjim/nui.nvim' },
+  --   opts = {},
+  -- },
   {
     'numToStr/Comment.nvim',
     config = function()
