@@ -86,7 +86,7 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- Open a terminal in a new split
 vim.keymap.set('n', '<leader>ot', ':split term://zsh<CR>', { desc = 'Open terminal in new split' })
 -- Current filepath
-vim.keymap.set('n', '<leader>fp', function()
+vim.keymap.set('n', '<leader>p', function()
   vim.fn.setreg('+', vim.fn.expand '%')
   vim.notify('Copied relative path to clipboard', vim.log.levels.INFO)
 end, { desc = 'Copy relative file path' })
