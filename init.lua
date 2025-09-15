@@ -115,6 +115,8 @@ rtp:prepend(lazypath)
 -- Here is where you install your plugins.
 require('lazy').setup({
   'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
+  -- Vim-endwise
+  'tpope/vim-endwise',
 
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -208,7 +210,21 @@ require('lazy').setup({
     config = function()
       -- [[ Configure Telescope ]]
       require('telescope').setup {
-        defaults = {},
+        defaults = {
+          mappings = {
+            n = { -- Mappings for Telescope's Normal mode
+              ['dd'] = function(prompt_bufnr)
+                local actions = require 'telescope.actions'
+                local selection = require('telescope.actions.state').get_selected_entry()
+                actions.close(prompt_bufnr)
+                if vim.fn.confirm('Delete ' .. selection.value .. '?', '&Yes\n&No', 2) == 1 then
+                  vim.fn.delete(selection.value)
+                  vim.notify('Deleted ' .. selection.value)
+                end
+              end,
+            },
+          },
+        },
         pickers = {
           find_files = {
             hidden = true,
@@ -238,6 +254,9 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      -- Keymaps for creating splits
+      vim.keymap.set('n', '<leader>ov', '<cmd>vsplit<CR>', { desc = '[S]plit [V]ertically' })
+      vim.keymap.set('n', '<leader>oh', '<cmd>split<CR>', { desc = '[S]plit [H]orizontally' })
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -697,12 +716,12 @@ require('lazy').setup({
     --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
   },
-  -- {
-  --   'm4xshen/hardtime.nvim',
-  --   lazy = false,
-  --   dependencies = { 'MunifTanjim/nui.nvim' },
-  --   opts = {},
-  -- },
+  {
+    'm4xshen/hardtime.nvim',
+    lazy = false,
+    dependencies = { 'MunifTanjim/nui.nvim' },
+    opts = {},
+  },
   {
     'numToStr/Comment.nvim',
     config = function()
@@ -750,4 +769,57 @@ require('lazy').setup({
     },
   },
 })
+-- Helper function to disable the RuboCop warning on the current line or selection
+local function toggle_rubocop_disable()
+  -- Get current cursor position (1-based line number)
+  local line_nr = vim.api.nvim_win_get_cursor(0)[1]
+
+  -- Get all diagnostics for the buffer and manually filter for the current line
+  local all_diagnostics = vim.diagnostic.get(0)
+  local line_diagnostics = {}
+  for _, d in ipairs(all_diagnostics) do
+    if d.lnum == line_nr - 1 then -- d.lnum is 0-indexed
+      table.insert(line_diagnostics, d)
+    end
+  end
+
+  local rule = nil
+
+  -- Find the RuboCop rule name from the filtered diagnostics
+  if #line_diagnostics > 0 then
+    for _, d in ipairs(line_diagnostics) do
+      local matched_rule = d.message:match '^([%w_/%d]+):'
+      if matched_rule then
+        rule = matched_rule
+        break
+      end
+    end
+  end
+
+  if not rule then
+    vim.notify('No RuboCop diagnostic found on current line.', vim.log.levels.WARN)
+    return
+  end
+
+  local disable_comment = ('# rubocop:disable %s'):format(rule)
+  local enable_comment = ('# rubocop:enable %s'):format(rule)
+  local mode = vim.api.nvim_get_mode().mode
+
+  if mode == 'v' or mode == 'V' then
+    -- VISUAL MODE: Wrap the selected block
+    local start_line, _ = unpack(vim.api.nvim_buf_get_mark(0, '<'))
+    local end_line, _ = unpack(vim.api.nvim_buf_get_mark(0, '>'))
+    local indent = vim.api.nvim_buf_get_lines(0, start_line - 1, start_line, true)[1]:match '^%s*'
+
+    vim.api.nvim_buf_set_lines(0, end_line, end_line, false, { indent .. enable_comment })
+    vim.api.nvim_buf_set_lines(0, start_line - 1, start_line - 1, false, { indent .. disable_comment })
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Esc>', true, false, true), 'n', false)
+  else
+    -- NORMAL MODE: Add a comment to the end of the current line
+    local current_line = vim.api.nvim_get_current_line()
+    vim.api.nvim_set_current_line(current_line .. ' ' .. disable_comment)
+  end
+end
+-- Create the keymap
+vim.keymap.set({ 'n', 'v' }, '<leader>rd', toggle_rubocop_disable, { desc = '[R]uboCop [D]isable warning' })
 -- vim: ts=2 sts=2 sw=2 et
